@@ -1,14 +1,12 @@
 
-public class Bomb extends Tile{
-    
+public class Bomb extends Tile {
 
     protected Bomb(int pRow, int pCol) {
         super(pRow, pCol);
     }
 
     @Override
-    public boolean isBomb(){
-        return false;
+    public boolean isBomb() {
+        return true;
     }
-
 }

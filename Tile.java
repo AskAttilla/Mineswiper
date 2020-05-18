@@ -1,3 +1,4 @@
+
 public class Tile {
     Tile north = null;
     Tile east = null;
@@ -7,7 +8,7 @@ public class Tile {
     int col;
     int row;
 
-    boolean visited;
+    int numBombs;
 
     protected Tile(int pRow, int pCol) {
         col = pCol;
@@ -61,11 +62,8 @@ public class Tile {
         return getRow() + ", " + getCol();
     }
 
-    public void setVisited(boolean visit) {
-        visited = visit;
-    }
-
-    public boolean isBomb(){
+    public boolean isBomb() {
         return false;
     }
+
 }

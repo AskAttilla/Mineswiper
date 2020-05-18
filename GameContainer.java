@@ -1,79 +1,84 @@
-public class GameContainer implements Runnable {
-    private Thread thread;
+import javafx.application.Application;
+import javafx.event.EventHandler;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
 
-    private boolean running = false;
-    private final double UPDATE_CAP = 1 / 60;
+public class GameContainer extends Application {
+    Maze game = new Maze(30);
+    GridPane grid = new GridPane();
+    Tile[][] mazeGrid = game.getMazeGrid();
 
-    public GameContainer() {
-
+    class ClickHandler implements EventHandler<MouseEvent> {
+        @Override
+        public void handle(MouseEvent e) {
+            GuiTile clickedTile = (GuiTile) e.getSource();
+            clickedTile.setColor();
+            clickedTile.setNum();
+        }
     }
 
-    public void start() {
-        thread = new Thread(this);
-        thread.run();
-    }
+    public class GuiTile extends Button {
+        int row;
+        int col;
+        EventHandler<MouseEvent> click = new ClickHandler();
 
-    public void stop() {
-    }
-    public void run() {
-        running = true;
+        GuiTile(int pRow, int pCol, int size) {
 
-        boolean render = false;
-        double firstTime = 0;
-        double lastTime = System.nanoTime() / 1000000000.0;
-        double passedTime = 0;
-        double unprocessedTime = 0;
+            super("0");
+            row = pRow;
+            col = pCol;
+            setPrefSize(size, size);
+            setStyle("-fx-background-color: #f0f0f0; ");
+            setOnMousePressed(click);
+        }
 
-        double frameTime = 0;
-        int frames = 0;
-        int fps = 0;
-
-        while (running) {
-            render = false; 
-
-            firstTime = System.nanoTime() / 1000000000.0;
-            passedTime = firstTime - lastTime;
-            lastTime = firstTime;
-
-            unprocessedTime += passedTime;
-            frameTime += passedTime;
-
-
-            while (unprocessedTime >= UPDATE_CAP) {
-                unprocessedTime -= UPDATE_CAP;
-                render = true;
-
-                // TODO: Update game
-                if(frameTime >= 1){
-                    frameTime = 0;
-                    fps = frames;
-                    frames = 0;
-                    System.out.println("FPS: "+fps);
-                }
-            }
-
-            if (render) {
-                // TODO: Render game
-                frames++;
-            } 
-            else {
-                try {
-                    Thread.sleep(1);
-                } 
-                catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+        public void setColor() {
+            if (mazeGrid[row][col].isBomb()) {
+                setStyle("-fx-background-color: #000; ");
+            } else {
+                setStyle("-fx-background-color: #fff; ");
             }
         }
-        dispose();
+
+        public void setNum() {
+            String numBombs = Integer.toString(mazeGrid[row][col].numBombs);
+            setText(numBombs);
+        }
+
     }
 
-    private void dispose(){
+    @Override
+    public void start(Stage primaryStage) {
+        final int width = 800;
+        final int height = 600;
+        final int tileSize = 10;
 
+        grid.setGridLinesVisible(false);
+        for (int row = 0; row < mazeGrid.length; row++) {
+            for (int col = 0; col < mazeGrid[row].length; col++) {
+                grid.add(new GuiTile(row, col, tileSize), col, row);
+            }
+        }
+
+        grid.setLayoutX(10);
+        grid.setLayoutY(10);
+
+        Pane kulisser = new Pane();
+        kulisser.setMinSize(width, height);
+        kulisser.getChildren().add(grid);
+
+        Scene scene = new Scene(kulisser);
+
+        primaryStage.setTitle("Maze");
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
 
     public static void main(String[] args) {
-        GameContainer gc = new GameContainer();
-        gc.start();
+        launch();
     }
 }
